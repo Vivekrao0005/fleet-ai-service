@@ -4,7 +4,7 @@ An agentic operations prototype that answers natural-language questions about a 
 
 Built with Node.js, Express, PostgreSQL, and Groq (Llama 3.3 70B). Deployed on AWS Elastic Beanstalk.
 
-[LIVE DEMO](http://your-url-here)
+[LIVE DEMO](http://hertz-ai-service-prod.eba-s6zdgjsi.us-east-2.elasticbeanstalk.com/)
 
 > **Note:** This is a portfolio prototype running on synthetic data. It is not affiliated with any commercial fleet operator. All vehicle IDs, VINs, names, and locations are fabricated.
 
