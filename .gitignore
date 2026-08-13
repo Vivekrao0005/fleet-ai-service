@@ -1,0 +1,51 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Build output
+Phase2/fleet-service/target/
+*.class
+*.jar
+*.jar.original
+
+# Database dumps
+*.dump
+*.sql.gz
+
+# Deployment artifacts
+*.zip
+
+# Dev backups
+*.backup
+*.backup.*
+*-backup
+*-backup.*
+Phase2/ai-service/src/server.js.phase*
+
+# Keys and certificates
+*.pem
+*.key
+*.cert
+*.p12
+*.pfx
+*.jks
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS junk
+.DS_Store
+Thumbs.db
+._*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

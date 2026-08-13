@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fleet AI Service</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent: #C8960C;
+  --accent-dim: rgba(200, 150, 12, 0.12);
+  --bg: #F3F2EF;
+  --surface: #FFFFFF;
+  --surface-raised: #F9F8F6;
+  --text: #23272E;
+  --text-secondary: #5F6672;
+  --text-tertiary: #8C919A;
+  --border: #DFDDD8;
+  --input-bg: #FFFFFF;
+  --code-bg: #F5F3EF;
+  --msg-user-bg: #23272E;
+  --msg-user-text: #F3F2EF;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  --body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171D;
+    --surface: #1E2028;
+    --surface-raised: #262830;
+    --text: #E3E1DC;
+    --text-secondary: #9DA2AC;
+    --text-tertiary: #6B7280;
+    --border: #2E3138;
+    --input-bg: #262830;
+    --code-bg: #1A1C22;
+    --msg-user-bg: #C8960C;
+    --msg-user-text: #15171D;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #15171D;
+  --surface: #1E2028;
+  --surface-raised: #262830;
+  --text: #E3E1DC;
+  --text-secondary: #9DA2AC;
+  --text-tertiary: #6B7280;
+  --border: #2E3138;
+  --input-bg: #262830;
+  --code-bg: #1A1C22;
+  --msg-user-bg: #C8960C;
+  --msg-user-text: #15171D;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+:root[data-theme="light"] {
+  --bg: #F3F2EF;
+  --surface: #FFFFFF;
+  --surface-raised: #F9F8F6;
+  --text: #23272E;
+  --text-secondary: #5F6672;
+  --text-tertiary: #8C919A;
+  --border: #DFDDD8;
+  --input-bg: #FFFFFF;
+  --code-bg: #F5F3EF;
+  --msg-user-bg: #23272E;
+  --msg-user-text: #F3F2EF;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- NAV ---- */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.nav-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-icon svg { width: 18px; height: 18px; fill: #181B22; }
+
+.nav-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.nav-links {
+  margin-left: auto;
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links a {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.nav-links a:hover { color: var(--accent); }
+
+/* ---- LAYOUT ---- */
+
+.container {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+section {
+  padding: 56px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+section:last-of-type { border-bottom: none; }
+
+h2 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+p + p { margin-top: 12px; }
+
+/* ---- HERO ---- */
+
+.hero {
+  padding: 72px 0 56px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.hero p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 540px;
+  margin: 0 auto 28px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: var(--body);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #181B22;
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn:hover { opacity: 0.88; }
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+/* ---- CAPABILITIES ---- */
+
+.cap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.cap-card {
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.cap-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cap-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--accent-dim);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.cap-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+/* ---- ARCHITECTURE ---- */
+
+.arch-diagram {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--text-secondary);
+  margin-top: 16px;
+}
+
+/* ---- APPROVAL GATE ---- */
+
+.gate-flow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.gate-step {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: var(--mono);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gate-ai {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.gate-human {
+  background: rgba(59, 155, 109, 0.12);
+  color: #3B9B6D;
+}
+
+.gate-system {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.gate-arrow {
+  color: var(--text-tertiary);
+  font-size: 16px;
+  padding: 0 2px;
+}
+
+/* ---- ENDPOINTS ---- */
+
+.endpoint-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.endpoint-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--border);
+}
+
+.endpoint-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.endpoint-table tr:last-child td { border-bottom: none; }
+
+.method {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.method-get {
+  background: rgba(59, 155, 109, 0.12);
+  color: #3B9B6D;
+}
+
+.path {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre;
+  margin-top: 12px;
+  color: var(--text);
+}
+
+/* ---- SCHEMA ---- */
+
+.schema-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.schema-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--border);
+}
+
+.schema-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.schema-table tr:last-child td { border-bottom: none; }
+
+.schema-table td:first-child {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--accent);
+}
+
+/* ---- CHAT DEMO ---- */
+
+.chat-wrapper {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  height: 520px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-raised);
+  flex-shrink: 0;
+}
+
+.chat-header-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3B9B6D;
+}
+
+.chat-header-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-messages::-webkit-scrollbar { width: 5px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.msg {
+  max-width: 85%;
+  animation: msgIn 0.25s ease-out;
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.msg-user { align-self: flex-end; }
+
+.msg-user .msg-bubble {
+  background: var(--msg-user-bg);
+  color: var(--msg-user-text);
+  border-radius: 12px 12px 4px 12px;
+  padding: 9px 14px;
+  font-size: 14px;
+}
+
+.msg-ai { align-self: flex-start; }
+
+.msg-ai .msg-bubble {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px 12px 12px 4px;
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+  font-size: 14px;
+}
+
+.msg-ai .msg-bubble p { margin-bottom: 6px; }
+.msg-ai .msg-bubble p:last-child { margin-bottom: 0; }
+.msg-ai .msg-bubble ul,
+.msg-ai .msg-bubble ol { padding-left: 18px; margin-bottom: 6px; }
+.msg-ai .msg-bubble li { margin-bottom: 3px; }
+.msg-ai .msg-bubble strong { font-weight: 600; }
+
+.msg-tool {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text-tertiary);
+  background: var(--surface-raised);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.data-val {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.msg-loading .msg-bubble {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px 12px 12px 4px;
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+}
+
+.loading-dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  height: 18px;
+}
+
+.loading-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  animation: dotPulse 1.2s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes dotPulse {
+  0%, 60%, 100% { opacity: 0.3; transform: scale(0.85); }
+  30% { opacity: 1; transform: scale(1); }
+}
+
+.chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.chip {
+  font-size: 12px;
+  font-family: var(--body);
+  padding: 5px 10px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.chip:hover, .chip:focus-visible {
+  border-color: var(--accent);
+  color: var(--text);
+  outline: none;
+}
+
+.chat-input-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.chat-input-bar textarea {
+  flex: 1;
+  resize: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-family: var(--body);
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text);
+  background: var(--input-bg);
+  min-height: 38px;
+  max-height: 80px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.chat-input-bar textarea::placeholder { color: var(--text-tertiary); }
+.chat-input-bar textarea:focus { border-color: var(--accent); }
+
+.send-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.send-btn:hover { opacity: 0.88; }
+.send-btn:active { transform: scale(0.95); }
+.send-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+.send-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.send-btn svg { width: 16px; height: 16px; fill: #181B22; }
+
+/* ---- FOOTER ---- */
+
+.footer {
+  padding: 32px 0;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.footer a:hover { text-decoration: underline; }
+
+/* ---- RESPONSIVE ---- */
+
+@media (max-width: 640px) {
+  .cap-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 26px; }
+  .nav-links { display: none; }
+  .gate-flow { gap: 2px; }
+  .gate-step { font-size: 11px; padding: 4px 8px; }
+  .chat-wrapper { height: 460px; }
+  .endpoint-table { font-size: 13px; }
+  .code-block { font-size: 12px; padding: 10px 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msg, .loading-dots span { animation: none; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-icon">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+    </svg>
+  </div>
+  <span class="nav-title">Fleet AI Service</span>
+  <div class="nav-links">
+    <a href="#capabilities">Capabilities</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#approval-gate">Approval Gate</a>
+    <a href="#endpoints">Endpoints</a>
+    <a href="#demo">Try It</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="container">
+    <div class="badge">Portfolio Prototype</div>
+    <h1>Fleet Operations, Answered<br>by an AI Agent</h1>
+    <p>Ask natural-language questions about a 200-vehicle rental fleet. The service classifies your intent, calls the right tool, queries PostgreSQL, and returns an accurate answer &mdash; no hallucinated numbers.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#demo">Try the demo</a>
+      <a class="btn btn-secondary" href="#endpoints">View endpoints</a>
+    </div>
+  </div>
+</div>
+
+<!-- CAPABILITIES -->
+<section id="capabilities">
+  <div class="container">
+    <h2>What it does</h2>
+    <p>Four capabilities, each backed by a dedicated tool function that the LLM selects via structured intent classification.</p>
+    <div class="cap-grid">
+      <div class="cap-card">
+        <h3><span class="cap-icon">&#x1F698;</span> Vehicle Status</h3>
+        <p>Look up any vehicle by ID. Get make, model, mileage, current location, and rental status in one query.</p>
+      </div>
+      <div class="cap-card">
+        <h3><span class="cap-icon">&#x1F4CA;</span> Utilization Analytics</h3>
+        <p>Count, average, and filter vehicles by utilization. Deterministic math &mdash; count and revenue answers bypass the LLM entirely.</p>
+      </div>
+      <div class="cap-card">
+        <h3><span class="cap-icon">&#x1F527;</span> Maintenance Flags</h3>
+        <p>Surface vehicles in maintenance, their severity, estimated cost, and open tickets. Filter by status or vehicle type.</p>
+      </div>
+      <div class="cap-card">
+        <h3><span class="cap-icon">&#x1F4E6;</span> Transfer Requests</h3>
+        <p>Identify underutilized vehicles and recommend relocations. Every transfer goes through a human approval gate before execution.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="container">
+    <h2>How it works</h2>
+    <p>A two-call LLM pattern. The first call classifies intent into structured JSON. The second generates a natural-language answer from real data. Numeric queries (count, average, revenue) skip the second call and return deterministic results.</p>
+    <div class="arch-diagram">User question
+      |
+      v
++-------------+     +--------------------+
+|  Groq LLM   |---->| Intent Classifier  |
+|  (call 1)   |     | returns JSON:      |
++-------------+     |  action, filters,  |
+                     |  vehicleId         |
+                     +---------+----------+
+                               |
+                    +----------v----------+
+                    |    Tool Router      |
+                    |                     |
+                    |  getVehicle         |
+                    |  searchVehicles     |
+                    |  analyzeFleet       |
+                    |  rankRelocation     |
+                    +----------+----------+
+                               |
+                       SQL query (pg)
+                               |
+                        +------v------+
+                        | PostgreSQL  |
+                        +------+------+
+                               |
+                +--------------v--------------+
+                |  Deterministic or LLM?      |
+                |                             |
+                |  count / avg / revenue      |
+                |  --> exact answer           |
+                |                             |
+                |  everything else            |
+                |  --> Groq LLM (call 2)     |
+                |     with fetched data       |
+                +--------------+--------------+
+                               |
+                               v
+                        Answer to user</div>
+  </div>
+</section>
+
+<!-- SCHEMA -->
+<section id="schema">
+  <div class="container">
+    <h2>Database schema</h2>
+    <p>Five PostgreSQL tables. All data is synthetic &mdash; 20 US locations, 200 vehicles with fabricated VINs, and realistic utilization patterns.</p>
+    <table class="schema-table">
+      <thead>
+        <tr><th>Table</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>locations</td><td>20 US cities with airport codes, demand scores per vehicle type (sedan, SUV, truck)</td></tr>
+        <tr><td>vehicles</td><td>200 vehicles &mdash; ID, VIN, make/model/year, type, status, mileage, utilization %, daily revenue</td></tr>
+        <tr><td>maintenance_records</td><td>Repair tickets with severity (LOW&ndash;CRITICAL), status, estimated cost, notes</td></tr>
+        <tr><td>utilization_history</td><td>Monthly snapshots &mdash; utilization %, rental days, available days per vehicle</td></tr>
+        <tr><td>transfer_requests</td><td>AI-recommended relocations with approval status, audit trail, and human approver field</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- APPROVAL GATE -->
+<section id="approval-gate">
+  <div class="container">
+    <h2>Approval gate</h2>
+    <p>The AI can analyze the fleet and recommend transfers, but it cannot unilaterally move a vehicle. Every relocation request follows this workflow:</p>
+    <div class="gate-flow">
+      <span class="gate-step gate-ai">AI recommends</span>
+      <span class="gate-arrow">&rarr;</span>
+      <span class="gate-step gate-system">PENDING_APPROVAL</span>
+      <span class="gate-arrow">&rarr;</span>
+      <span class="gate-step gate-human">Human approves</span>
+      <span class="gate-arrow">&rarr;</span>
+      <span class="gate-step gate-system">APPROVED</span>
+      <span class="gate-arrow">&rarr;</span>
+      <span class="gate-step gate-system">IN_TRANSIT</span>
+      <span class="gate-arrow">&rarr;</span>
+      <span class="gate-step gate-system">COMPLETED</span>
+    </div>
+    <p>This is enforced at the database level, not the application layer. The <code>transfer_requests</code> table has:</p>
+    <ul style="margin-top: 8px; padding-left: 20px; color: var(--text-secondary); font-size: 14px;">
+      <li>A <code>CHECK</code> constraint on <code>status</code> limiting values to the six valid states</li>
+      <li>An <code>approved_by</code> column &mdash; must name a human before status can change to APPROVED</li>
+      <li><code>requested_at</code>, <code>approved_at</code>, <code>completed_at</code> timestamps for a full audit trail</li>
+      <li>A <code>CHECK (from_location_id &lt;&gt; to_location_id)</code> to prevent no-op transfers</li>
+    </ul>
+    <p style="margin-top: 12px;">Because the constraint lives in PostgreSQL, it is enforced regardless of which client writes to the table &mdash; the API, a migration script, or a direct SQL session.</p>
+  </div>
+</section>
+
+<!-- ENDPOINTS -->
+<section id="endpoints">
+  <div class="container">
+    <h2>REST endpoints</h2>
+    <table class="endpoint-table">
+      <thead>
+        <tr><th>Method</th><th>Path</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="method">POST</span></td>
+          <td class="path">/api/ask</td>
+          <td>Send <code>{ question, history }</code> &mdash; returns <code>{ answer, tool? }</code></td>
+        </tr>
+        <tr>
+          <td><span class="method method-get">GET</span></td>
+          <td class="path">/api/tools/vehicle/:id</td>
+          <td>Direct vehicle lookup by ID (bypasses LLM)</td>
+        </tr>
+        <tr>
+          <td><span class="method method-get">GET</span></td>
+          <td class="path">/health</td>
+          <td>Health check &mdash; returns <code>{ status: "UP" }</code></td>
+        </tr>
+        <tr>
+          <td><span class="method method-get">GET</span></td>
+          <td class="path">/config-check</td>
+          <td>Shows whether Groq key and DB are configured (no secrets exposed)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top: 24px;">Example</h3>
+    <div class="code-block">curl -X POST http://localhost:3000/api/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question": "How many SUVs are available?", "history": []}'</div>
+    <div class="code-block" style="margin-top: 8px;">{"question":"How many SUVs are available?","answer":"There are 28 vehicles available (SUV).","tool":"analyzeFleet"}</div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <div class="container">
+    <h2>Try it</h2>
+    <p>This is a live chat connected to the AI service. Ask anything about the fleet.</p>
+    <div class="chat-wrapper">
+      <div class="chat-header">
+        <div class="chat-header-dot"></div>
+        <span class="chat-header-label">Fleet AI</span>
+      </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <div class="chat-suggestions">
+        <button class="chip" data-q="How many vehicles are available?">Available vehicles</button>
+        <button class="chip" data-q="What is the utilization of H004?">Vehicle H004</button>
+        <button class="chip" data-q="Which vehicles are underutilized?">Underutilized</button>
+        <button class="chip" data-q="Which vehicles should be relocated?">Relocation</button>
+        <button class="chip" data-q="What is the total daily revenue?">Revenue</button>
+      </div>
+      <div class="chat-input-bar">
+        <textarea id="chatInput" rows="1" placeholder="Ask about vehicles, utilization, revenue..."></textarea>
+        <button class="send-btn" id="sendBtn" title="Send">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="container">
+    <p>Portfolio prototype built on synthetic data. Not affiliated with any commercial fleet operator.</p>
+    <p style="margin-top: 6px;">Built with Node.js, Express, PostgreSQL, and <a href="https://groq.com">Groq</a> (Llama 3.3 70B).</p>
+  </div>
+</div>
+
+<script>
+var messagesEl = document.getElementById('chatMessages');
+var inputEl = document.getElementById('chatInput');
+var sendBtn = document.getElementById('sendBtn');
+var busy = false;
+var conversationHistory = [];
+
+function autoResize() {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 80) + 'px';
+}
+
+inputEl.addEventListener('input', autoResize);
+
+inputEl.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+});
+
+sendBtn.addEventListener('click', send);
+
+document.querySelectorAll('.chip').forEach(function(chip) {
+  chip.addEventListener('click', function() {
+    inputEl.value = this.dataset.q;
+    autoResize();
+    send();
+  });
+});
+
+function send() {
+  var text = inputEl.value.trim();
+  if (!text || busy) return;
+
+  appendMsg('user', text);
+  inputEl.value = '';
+  autoResize();
+  busy = true;
+  sendBtn.disabled = true;
+
+  var loadingEl = appendLoading();
+
+  conversationHistory.push({ role: 'user', content: text });
+
+  fetch('/api/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      question: text,
+      history: conversationHistory.slice(0, -1)
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    loadingEl.remove();
+    if (data.error) {
+      var errMsg = data.message || data.error;
+      appendMsg('ai', errMsg, null);
+      conversationHistory.push({ role: 'assistant', content: errMsg });
+    } else {
+      appendMsg('ai', data.answer, data.tool);
+      conversationHistory.push({ role: 'assistant', content: data.answer });
+    }
+    if (conversationHistory.length > 20) {
+      conversationHistory = conversationHistory.slice(-20);
+    }
+  })
+  .catch(function() {
+    loadingEl.remove();
+    appendMsg('ai', 'Connection error. Please try again.', null);
+  })
+  .finally(function() {
+    busy = false;
+    sendBtn.disabled = false;
+    inputEl.focus();
+  });
+}
+
+function appendMsg(role, text, tool) {
+  var wrapper = document.createElement('div');
+  wrapper.className = 'msg msg-' + role;
+
+  var bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+
+  if (role === 'ai') {
+    bubble.innerHTML = formatAI(text);
+    if (tool) {
+      var toolTag = document.createElement('div');
+      toolTag.className = 'msg-tool';
+      toolTag.textContent = tool;
+      wrapper.appendChild(bubble);
+      wrapper.appendChild(toolTag);
+      messagesEl.appendChild(wrapper);
+      scrollDown();
+      return;
+    }
+  } else {
+    bubble.textContent = text;
+  }
+
+  wrapper.appendChild(bubble);
+  messagesEl.appendChild(wrapper);
+  scrollDown();
+}
+
+function appendLoading() {
+  var wrapper = document.createElement('div');
+  wrapper.className = 'msg msg-ai msg-loading';
+
+  var bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+
+  wrapper.appendChild(bubble);
+  messagesEl.appendChild(wrapper);
+  scrollDown();
+  return wrapper;
+}
+
+function formatAI(text) {
+  if (!text) return '';
+
+  var lines = text.split('\n');
+  var html = '';
+  var inList = false;
+  var listType = '';
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    var olMatch = line.match(/^\d+[\.\)]\s+(.*)/);
+    var ulMatch = line.match(/^[\*\-]\s+(.*)/);
+
+    if (olMatch) {
+      if (!inList || listType !== 'ol') {
+        if (inList) html += '</' + listType + '>';
+        html += '<ol>';
+        inList = true;
+        listType = 'ol';
+      }
+      html += '<li>' + highlightData(olMatch[1]) + '</li>';
+    } else if (ulMatch) {
+      if (!inList || listType !== 'ul') {
+        if (inList) html += '</' + listType + '>';
+        html += '<ul>';
+        inList = true;
+        listType = 'ul';
+      }
+      html += '<li>' + highlightData(ulMatch[1]) + '</li>';
+    } else {
+      if (inList) {
+        html += '</' + listType + '>';
+        inList = false;
+      }
+      var trimmed = line.trim();
+      if (trimmed) {
+        html += '<p>' + highlightData(trimmed) + '</p>';
+      }
+    }
+  }
+
+  if (inList) html += '</' + listType + '>';
+  return html;
+}
+
+function highlightData(text) {
+  text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/\b(H\d{3})\b/g, '<span class="data-val">$1</span>');
+  text = text.replace(/(\$[\d,]+\.?\d*)/g, '<span class="data-val">$1</span>');
+  text = text.replace(/(\d+\.?\d*%)/g, '<span class="data-val">$1</span>');
+  return text;
+}
+
+function scrollDown() {
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+</script>
+
+</body>
+</html>
